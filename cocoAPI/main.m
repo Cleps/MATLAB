@@ -31,7 +31,7 @@ bbox_actual = temp';
 img_actual = B.image_id(1);
 cat = B.category_id(1);
 image_index=1;
-for index=1:100
+for index=1:len
        %read current image
        %insert data in table
        % if current image is equal to actual insert in actual line else

@@ -14,26 +14,38 @@ end
 
 data = load('./cocoApi/cocoDatasetGroundTruth.mat');
 cocoDataset = data.data;
-cocoDataset = cocoDataset(1:100,:);
-labels =cocoDataset(:, 2:end);
-blds = boxLabelDatastore(labels);
-imds = imageDatastore(cocoDataset.imageFilename(:));
-trainingData = combine(imds, blds);
-validateInputData(trainingData)
-
+cocoDataset = cocoDataset(1:10,:);
 
 %cocoDataset = cocoDataset(1:100,1:2);
 %teste = cocoDataset(5,1:2)
 % Add the full path to the local vehicle data folder.
 %data.imageFilename = fullfile(pwd, data.imageFilename);
 
-% rng(0);
-% shuffledIndices = randperm(height(cocoDataset));
-% idx = floor(0.8 * length(shuffledIndices));
-% trainingDataTbl = cocoDataset(shuffledIndices(1:idx), :);
-% testDataTbl = cocoDataset(shuffledIndices(idx+1:end), :);
+rng(0);
+shuffledIndices = randperm(height(cocoDataset));
+idx = floor(0.8 * length(shuffledIndices));
+trainingDataTbl = cocoDataset(shuffledIndices(1:idx), :);
+testDataTbl = cocoDataset(shuffledIndices(idx+1:end), :);
 
 %Create an image datastore for loading the images.
+
+train_labels = trainingDataTbl(:, 2:end);
+test_labels = testDataTbl(:, 2:end);
+
+train_blds = boxLabelDatastore(train_labels);
+test_blds = boxLabelDatastore(test_labels);
+
+train_imds = imageDatastore(trainingDataTbl.imageFilename(:));
+test_imds = imageDatastore(testDataTbl.imageFilename(:));
+
+trainingData = combine(train_imds, train_blds);
+testData = combine(test_imds, test_blds);
+
+%====================================
+%validateInputData(trainingData)
+%validateInputData(testData)
+%====================================
+
 %imdsTrain = imageDatastore(trainingDataTbl.imageFilename);
 %imdsTest = imageDatastore(testDataTbl.imageFilename);
 %Create a datastore for the ground truth bounding boxes.
@@ -44,8 +56,8 @@ validateInputData(trainingData)
 %testData = combine(imdsTest, bldsTest);
 %save testData testData
 %validate
-validateInputData(trainingDataTbl);
-validateInputData(testData);
+%validateInputData(trainingDataTbl);
+%validateInputData(testData);
 
 %% Data Aug
 augmentedTrainingData = transform(trainingData, @augmentData);
@@ -76,6 +88,7 @@ anchorBoxes = {anchors(1:3,:)
 baseNetwork = squeezenet;
 classNames = trainingDataTbl.Properties.VariableNames(2:end);
 
+%%
 
 yolov3Detector = yolov3ObjectDetector(baseNetwork, classNames, anchorBoxes, 'DetectionNetworkSource', {'fire9-concat', 'fire5-concat'});
 
