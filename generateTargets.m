@@ -130,6 +130,7 @@ function iou = getMaxIOUPredictedWithGroundTruth(predx,predy,predw,predh,truth)
 iou = zeros([h w c n],'like',predx);
 
 % For each batch prepare the predictions and ground-truth.
+%%
 for batchSize = 1:n
     truthBatch = truth(:,1:4,1,batchSize);
     truthBatch = truthBatch(all(truthBatch,2),:);
@@ -152,7 +153,7 @@ for batchSize = 1:n
             error(me.message + " Invalid groundtruth. Check that your ground truth boxes are not empty and finite, are fully contained within the image boundary, and have positive width and height.");
         end
     end
-    
+  
     maxOverlap = max(overlap,[],2);
     iou(:,:,:,batchSize) = reshape(maxOverlap,h,w,c);
 end

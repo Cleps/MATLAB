@@ -31,6 +31,7 @@ bbox_actual = temp';
 img_actual = B.image_id(1);
 cat = B.category_id(1);
 image_index=1;
+flag=false;
 for index=1:len
        %read current image
        %insert data in table
@@ -51,13 +52,21 @@ for index=1:len
         if temp(1,1)+temp(3,1)>width
            temp(3,1)= width-temp(1,1);
         end
-
+           
         bbox_actual = int64(temp'); %TIRANDO +1 DAQ
-        C{image_index,cat+1}=[C{image_index,cat+1}; bbox_actual];
-        C{image_index,1}=strcat(dataset_base, '\', num2str(img_actual,'%012.f'), '.jpg'); %9, 1
+        if (bbox_actual(1,4)<=1) || (bbox_actual(1,3)<=1)
+            %disp(bbox_actual)
+            flag=true;
+        elseif (~flag)
+            C{image_index,cat+1}=[C{image_index,cat+1}; bbox_actual];
+            C{image_index,1}=strcat(dataset_base, '\', num2str(img_actual,'%012.f'), '.jpg'); %9, 1
+        end
         
-    else 
-        image_index = image_index+1;
+    else
+        if (~flag)
+            image_index = image_index+1;
+        end
+        flag=false;
         cat = B.category_id(index);
         cat = find(categories.id==cat);
         temp = B.bbox(index);
@@ -72,9 +81,13 @@ for index=1:len
         % MOVENDO BBOX ATUAL + 1 DAQ ---------------------------------------
         bbox_actual = int64(temp');
         img_actual = B.image_id(index);
-
-        C{image_index,cat+1}=[C{image_index,cat+1}; bbox_actual];
-        C{image_index,1}=strcat(dataset_base, '\', num2str(img_actual,'%012.f'), '.jpg');
+        if (bbox_actual(1,4)<=1) || (bbox_actual(1,3)<=1)
+            disp(bbox_actual)
+            flag=true;
+        elseif (~flag)
+            C{image_index,cat+1}=[C{image_index,cat+1}; bbox_actual];
+            C{image_index,1}=strcat(dataset_base, '\', num2str(img_actual,'%012.f'), '.jpg');
+        end
         
     end
 
@@ -128,9 +141,9 @@ T.Properties.VariableNames([1:81]) = {'imageFilename', categories_temp{:}};
 %%formatar a imagem pra inteiro e somar mais 1 antes de fazer os calculos
 %%if e else
 
+data=T(1:117254,:); %retirando imagens com bbox <=1
+%data=T;
 
-data=T;
-
-save cocoDatasetGroundTruth data
+%save cocoDatasetGroundTruth data
 
 

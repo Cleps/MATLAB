@@ -31,7 +31,8 @@ bbox_actual = temp';
 img_actual = B.image_id(1);
 cat = B.category_id(1);
 image_index=1;
-for index=1:100
+flag=false;
+for index=1:len
        %read current image
        %insert data in table
        % if current image is equal to actual insert in actual line else
@@ -51,17 +52,25 @@ for index=1:100
         if temp(1,1)+temp(3,1)>width
            temp(3,1)= width-temp(1,1);
         end
-
+           
         bbox_actual = int64(temp'); %TIRANDO +1 DAQ
-        C{image_index,cat+1}=[C{image_index,cat+1}; bbox_actual];
-        C{image_index,1}=strcat(dataset_base, '\', num2str(img_actual,'%012.f'), '.jpg'); %9, 1
+        if (bbox_actual(1,4)<=1) || (bbox_actual(1,3)<=1)
+            disp(bbox_actual)
+            flag=true;
+        else
+            C{image_index,cat+1}=[C{image_index,cat+1}; bbox_actual];
+            C{image_index,1}=strcat(dataset_base, '\', num2str(img_actual,'%012.f'), '.jpg'); %9, 1
+        end
         
-    else 
-        image_index = image_index+1;
+    else
+        if (~flag)
+            image_index = image_index+1;
+        end
+        flag=false;
         cat = B.category_id(index);
         cat = find(categories.id==cat);
         temp = B.bbox(index);
-        temp = temp{1};  %ADICIONADO +1 AQ
+        temp = temp{1}+1;  %ADICIONADO +1 AQ
         
         if temp(2,1)+temp(4,1)>height
            temp(4,1)= height-temp(2,1);
@@ -71,8 +80,11 @@ for index=1:100
         end
         % MOVENDO BBOX ATUAL + 1 DAQ ---------------------------------------
         bbox_actual = int64(temp');
+        if (bbox_actual(1,4)<=1) || (bbox_actual(1,3)<=1)
+            disp(bbox_actual)
+        end
         img_actual = B.image_id(index);
-
+        
         C{image_index,cat+1}=[C{image_index,cat+1}; bbox_actual];
         C{image_index,1}=strcat(dataset_base, '\', num2str(img_actual,'%012.f'), '.jpg');
         
@@ -131,6 +143,6 @@ T.Properties.VariableNames([1:81]) = {'imageFilename', categories_temp{:}};
 
 data=T;
 
-save cocoDatasetGroundTruth data
+%save cocoDatasetGroundTruth data
 
 

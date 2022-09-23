@@ -14,7 +14,7 @@ end
 
 data = load('./cocoApi/cocoDatasetGroundTruth.mat');
 cocoDataset = data.data;
-cocoDataset = cocoDataset(1:10,:);
+%cocoDataset = cocoDataset(1:10,:);
 
 %cocoDataset = cocoDataset(1:100,1:2);
 %teste = cocoDataset(5,1:2)
