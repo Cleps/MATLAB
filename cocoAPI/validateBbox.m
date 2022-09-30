@@ -3,7 +3,10 @@ function [new_bbox,valid] = validateBbox(bbox, height, width)
     %This function receive bbox cell, {[x, y, width, height]} and width,
     %height from image respective
     %====================================================================
-    % add +1 to size of bbox (not start in 0) 
+    %Scalar
+    scalar_w = 227/width; scalar_h = 227/height;
+
+    % add +1 to size of bbox (not start in 0)
     temp = bbox{1}+1;
     valid = length(temp)==4;
     %check if size of bbox h,w is less than image
@@ -15,6 +18,8 @@ function [new_bbox,valid] = validateBbox(bbox, height, width)
     end
     
     new_bbox = int64(temp'); % transpose column to row
+    %reescale
+    new_bbox = [new_bbox(1,1)*scalar_w new_bbox(1,2)*scalar_h new_bbox(1,3)*scalar_w new_bbox(1,4)*scalar_h];
     %check size of w, h
     if (new_bbox(1,4)<=1) || (new_bbox(1,3)<=1)
         %disp(bbox_actual)

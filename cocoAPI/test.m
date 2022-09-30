@@ -1,5 +1,5 @@
 
 
-bbox=[1; 3; 1; 10]
+bbox=[20; 20; 9; 9]
 
-[new_bbox, valid] = validateBbox({bbox}, 10, 10);
+[new_bbox, valid] = validateBbox({bbox}, 400, 500);

@@ -32,61 +32,32 @@ img_actual = B.image_id(1);
 cat = B.category_id(1);
 image_index=1;
 flag=false;
+invalid_bboxes=[]
 for index=1:len
-       %read current image
-       %insert data in table
-       % if current image is equal to actual insert in actual line else
-       % insert in next line
-            
          height = img_files.height(find(img_files.id==B.image_id(index)));
-         width = img_files.width(find(img_files.id==B.image_id(index)));
-        
-    if (img_actual==B.image_id(index)) %10
+         width = img_files.width(find(img_files.id==B.image_id(index)));   
+    if (img_actual==B.image_id(index))
         cat = B.category_id(index);
         cat = find(categories.id==cat);
-        temp = B.bbox(index);
-        temp = temp{1}+1; %COLOCANDO +1 AQUI
-        if temp(2,1)+temp(4,1)>height
-           temp(4,1)= height-temp(2,1);
-        end
-        if temp(1,1)+temp(3,1)>width
-           temp(3,1)= width-temp(1,1);
-        end
-           
-        bbox_actual = int64(temp'); %TIRANDO +1 DAQ
-        if (bbox_actual(1,4)<=1) || (bbox_actual(1,3)<=1)
-            %disp(bbox_actual)
-            flag=true;
-        elseif (~flag)
-            C{image_index,cat+1}=[C{image_index,cat+1}; bbox_actual];
-            C{image_index,1}=strcat(dataset_base, '\', num2str(img_actual,'%012.f'), '.jpg'); %9, 1
+        [new_bbox,valid] = validateBbox(B.bbox(index), height, width);
+        if (valid)
+            C{image_index,cat+1}=[C{image_index,cat+1}; new_bbox];
+            C{image_index,1}=strcat(dataset_base, '\', num2str(img_actual,'%012.f'), '.jpg');
+        else
+            invalid_bboxes=[invalid_bboxes image_index];
         end
         
     else
-        if (~flag)
-            image_index = image_index+1;
-        end
-        flag=false;
+        image_index = image_index+1;
         cat = B.category_id(index);
         cat = find(categories.id==cat);
-        temp = B.bbox(index);
-        temp = temp{1}+1;  %ADICIONADO +1 AQ
-        
-        if temp(2,1)+temp(4,1)>height
-           temp(4,1)= height-temp(2,1);
-        end
-        if temp(1,1)+temp(3,1)>width
-           temp(3,1)= width-temp(1,1);
-        end
-        % MOVENDO BBOX ATUAL + 1 DAQ ---------------------------------------
-        bbox_actual = int64(temp');
+        [new_bbox,valid] = validateBbox(B.bbox(index), height, width);
         img_actual = B.image_id(index);
-        if (bbox_actual(1,4)<=1) || (bbox_actual(1,3)<=1)
-            disp(bbox_actual)
-            flag=true;
-        elseif (~flag)
+        if (valid)
             C{image_index,cat+1}=[C{image_index,cat+1}; bbox_actual];
             C{image_index,1}=strcat(dataset_base, '\', num2str(img_actual,'%012.f'), '.jpg');
+        else
+            invalid_bboxes=[invalid_bboxes image_index];
         end
         
     end
